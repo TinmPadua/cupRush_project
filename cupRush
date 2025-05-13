@@ -1,0 +1,445 @@
+import sys
+
+
+INVENTORY = {
+    'Hot Coffee': {
+        'Classic Brew': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Vanilla Espresso': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Hazelnut Latte': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Caramel Macchiato': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Mocha Delight': {'Small': 10, 'Medium': 10, 'Large': 10},
+    },
+    'Iced Coffee': {
+        'Iced Americano': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Iced Vanilla Cold Brew': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Iced Latte': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Iced Mocha': {'Small': 10, 'Medium': 10, 'Large': 10},
+        'Iced Caramel Drip': {'Small': 10, 'Medium': 10, 'Large': 10},
+    },
+    'Bakery': {
+        'Donuts': {
+            'Glazed Donut': 10,
+            'Choco Dip Donut': 10,
+            'Matcha Donut': 10
+        },
+        'Sandwiches': {
+            'Egg Mayo Sandwich': 10,
+            'Ham & Cheese Sandwich': 10,
+            'BLT Sandwich': 10
+        },
+        'Pastries': {
+            'Plain Croissant': 10,
+            'Chocolate Croissant': 10
+        },
+        'Cakes': {
+            'Chocolate Cake': 10,
+            'Red Velvet Cake': 10,
+            'Ube Cake': 10
+        }
+    }
+}
+
+PRICES = {
+    'Hot Coffee': {
+        'Classic Brew': {'Small': 80, 'Medium': 90, 'Large': 100},
+        'Vanilla Espresso': {'Small': 90, 'Medium': 100, 'Large': 110},
+        'Hazelnut Latte': {'Small': 95, 'Medium': 105, 'Large': 115},
+        'Caramel Macchiato': {'Small': 105, 'Medium': 115, 'Large': 125},
+        'Mocha Delight': {'Small': 110, 'Medium': 120, 'Large': 130},
+    },
+    'Iced Coffee': {
+        'Iced Americano': {'Small': 85, 'Medium': 95, 'Large': 105},
+        'Iced Vanilla Cold Brew': {'Small': 90, 'Medium': 100, 'Large': 110},
+        'Iced Latte': {'Small': 95, 'Medium': 105, 'Large': 115},
+        'Iced Mocha': {'Small': 105, 'Medium': 115, 'Large': 125},
+        'Iced Caramel Drip': {'Small': 110, 'Medium': 120, 'Large': 130},
+    },
+    'Bakery': {
+        'Donuts': {
+            'Glazed Donut': 40,
+            'Choco Dip Donut': 45,
+            'Matcha Donut': 50
+        },
+        'Sandwiches': {
+            'Egg Mayo Sandwich': 50,
+            'Ham & Cheese Sandwich': 70,
+            'BLT Sandwich': 120
+        },
+        'Pastries': {
+            'Plain Croissant': 60,
+            'Chocolate Croissant': 80
+        },
+        'Cakes': {
+            'Chocolate Cake': 90,
+            'Red Velvet Cake': 95,
+            'Ube Cake': 100
+        }
+    }
+}
+
+ADD_ONS = {
+    'Extra Shot of Espresso': 20,
+    'Syrup': 15,
+    'Whipped Cream': 20,
+    'Extra Cream': 10,
+}
+
+VAT_RATE = 0.12
+DISCOUNT_RATE = 0.20
+
+def display_welcome():
+    print("\n======================================")
+    print("       Welcome to CupRush Cafe!")
+    print("======================================\n")
+
+def display_main_menu():
+    print("\nMain Menu:")
+    print("1. Hot Coffee")
+    print("2. Iced Coffee")
+    print("3. Bakery")
+    print("4. Restock Inventory") 
+    print("5. Exit")
+
+def get_category_choice():
+    while True:
+        try:
+            choice = int(input("Select a category (1-5): "))
+            if 1 <= choice <= 5:
+                return choice
+            else:
+                print("Invalid choice. Please select 1-5.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def display_sub_menu(category):
+    print(f"\n{category} Menu:")
+    items = list(INVENTORY[category].keys())
+    for idx, item in enumerate(items, 1):
+        print(f"{idx}. {item}")
+    print(f"{len(items)+1}. Back to Main Menu")
+    return items
+
+def get_item_choice(items):
+    while True:
+        try:
+            choice = int(input(f"Select an item (1-{len(items)+1}): "))
+            if 1 <= choice <= len(items)+1:
+                return choice
+            else:
+                print(f"Invalid choice. Please select 1-{len(items)+1}.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def get_cup_size():
+    sizes = ['Small', 'Medium', 'Large']
+    print("\nCup Sizes:")
+    for idx, size in enumerate(sizes, 1):
+        print(f"{idx}. {size}")
+    while True:
+        try:
+            choice = int(input("Select cup size (1-3): "))
+            if 1 <= choice <= 3:
+                return sizes[choice-1]
+            else:
+                print("Invalid choice. Please select 1-3.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def get_quantity(max_qty):
+    while True:
+        try:
+            qty = int(input(f"Enter quantity (max {max_qty}): "))
+            if 1 <= qty <= max_qty:
+                return qty
+            else:
+                print(f"Invalid quantity. Please enter 1-{max_qty}.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def check_stock(category, item, size=None, qty=1):
+    if category == 'Bakery':
+        for subcat in INVENTORY['Bakery']:
+            if item in INVENTORY['Bakery'][subcat]:
+                return INVENTORY['Bakery'][subcat][item] >= qty
+        return False
+    else:
+        return INVENTORY[category][item][size] >= qty
+
+def handle_out_of_stock():
+    print("Sorry, the item is out of stock. Please choose another.")
+
+def display_add_ons():
+    print("\nAdd-ons:")
+    for idx, (addon, price) in enumerate(ADD_ONS.items(), 1):
+        print(f"{idx}. {addon} (+{price} PHP)")
+    print(f"{len(ADD_ONS)+1}. No Add-ons")
+
+def get_add_ons():
+    selected = []
+    while True:
+        display_add_ons()
+        try:
+            choice = int(input(f"Select add-on (1-{len(ADD_ONS)+1}, 0 to finish): "))
+            if choice == 0:
+                break
+            elif 1 <= choice <= len(ADD_ONS):
+                addon = list(ADD_ONS.keys())[choice-1]
+                if addon not in selected:
+                    selected.append(addon)
+                else:
+                    print("Already selected.")
+            elif choice == len(ADD_ONS)+1:
+                break
+            else:
+                print("Invalid choice.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+    return selected
+
+def calculate_price(category, item, size, qty, add_ons):
+    if category == 'Bakery':
+        for subcat in PRICES['Bakery']:
+            if item in PRICES['Bakery'][subcat]:
+                base_price = PRICES['Bakery'][subcat][item] * qty
+                break
+    else:
+        base_price = PRICES[category][item][size] * qty
+    add_ons_price = sum(ADD_ONS[addon] for addon in add_ons) * qty
+    subtotal = base_price + add_ons_price
+    vat = subtotal * VAT_RATE
+    total = subtotal + vat
+    return subtotal, vat, total
+
+def ask_add_another():
+    while True:
+        ans = input("\nAdd another item? (y/n): ").strip().lower()
+        if ans in ('y', 'n'):
+            return ans == 'y'
+        print("Invalid input. Please enter 'y' or 'n'.")
+
+def ask_discount():
+    while True:
+        ans = input("\nAre you a PWD or Senior Citizen? (y/n): ").strip().lower()
+        if ans in ('y', 'n'):
+            return ans == 'y'
+        print("Invalid input. Please enter 'y' or 'n'.")
+
+def show_order_summary(order_list, discount_applied):
+    print("\nOrder Summary:")
+    total = 0
+    for idx, order in enumerate(order_list, 1):
+        print(f"{idx}. {order['desc']} x{order['qty']} - {order['total']:.2f} PHP")
+        total += order['total']
+    if discount_applied:
+        print(f"\nDiscount Applied: -{DISCOUNT_RATE*100:.0f}%")
+        total *= (1 - DISCOUNT_RATE)
+    print(f"Total Due: {total:.2f} PHP\n")
+    return total
+
+def confirm_order():
+    while True:
+        ans = input("Confirm order? (y/n): ").strip().lower()
+        if ans in ('y', 'n'):
+            return ans == 'y'
+        print("Invalid input. Please enter 'y' or 'n'.")
+
+def update_inventory(order_list):
+    for order in order_list:
+        cat = order['category']
+        item = order['item']
+        size = order.get('size')
+        qty = order['qty']
+        if cat == 'Bakery':
+            for subcat in INVENTORY['Bakery']:
+                if item in INVENTORY['Bakery'][subcat]:
+                    INVENTORY['Bakery'][subcat][item] -= qty
+                    break
+        else:
+            INVENTORY[cat][item][size] -= qty
+
+def print_receipt(order_list, discount_applied, total_due, dine_option):
+    print("\n")
+    print("============================== RECEIPT ===============================")
+    print("                     CupRush: The Spartan Sip Spot")
+    print("                     Marawoy, Lipa City, Batangas")
+    print(f"                     Order Type: {dine_option}")
+    print("=" * 70)
+    print("{:<4} {:<40} {:>5} {:>10}".format("No", "Item", "Qty", "Total"))
+    print("-" * 70)
+
+    total_items = 0
+    subtotal_sum = 0
+    vat_sum = 0
+
+    for idx, order in enumerate(order_list, 1):
+        print("{:<4} {:<40} {:>5} {:>10.2f}".format(
+            idx, order['desc'][:40], order['qty'], order['total']))
+        total_items += order['qty']
+        subtotal_sum += order['subtotal']
+        vat_sum += order['vat']
+
+    print("-" * 70)
+    print(f"{'Items Ordered:':<36} {total_items}")
+    print(f"{'Subtotal:':<36} {subtotal_sum:.2f} PHP")
+    print(f"{'VATable Sales:':<36} {subtotal_sum:.2f} PHP")
+    print(f"{'VAT (12%):':<36} {vat_sum:.2f} PHP")
+
+    if discount_applied:
+        discount_amt = total_due / (1 - DISCOUNT_RATE) * DISCOUNT_RATE
+        print(f"{'Discount Applied (20%):':<36} -{discount_amt:.2f} PHP")
+        print(f"{'Total Due after Discount:':<36} {total_due:.2f} PHP")
+    else:
+        print(f"{'Total Due:':<36} {total_due:.2f} PHP")
+
+    print("-" * 70)
+    print("\n")
+    print("              ======================================")
+    print("                  THANK YOU. PLEASE COME AGAIN.")
+    print("              ======================================\n")
+
+
+
+def show_inventory():
+    print("\nUpdated Inventory:")
+    for category, items in INVENTORY.items():
+        print(f"\n{category}:")
+        for item, stock in items.items():
+            if isinstance(stock, dict):
+                sizes = ", ".join([f"{size}: {qty}" for size, qty in stock.items()])
+                print(f"  {item} -> {sizes}")
+            else:
+                print(f"  {item} -> {stock}")
+
+def restock_inventory():
+    print("\nRestocking Inventory...")
+    for category, items in INVENTORY.items():
+        for item in items:
+            if isinstance(INVENTORY[category][item], dict):
+                for size in INVENTORY[category][item]:
+                    INVENTORY[category][item][size] = 10
+            else:
+                INVENTORY[category][item] = 10
+    print("All items restocked to 10 each.\n")
+    show_inventory()
+
+def get_dine_option():
+    while True:
+        ans = input("Dine-In or Take Out? (D/T): ").strip().lower()
+        if ans in ('d', 't'):
+            return "Dine-In" if ans == 'd' else "Take Out"
+        print("Invalid input. Please enter 'D' for Dine-In or 'T' for Take Out.")
+
+def main():
+    display_welcome()
+    dine_option = get_dine_option()
+
+    while True:
+        order_list = []
+
+        while True:
+            display_main_menu()
+            cat_choice = get_category_choice()
+
+            if cat_choice == 5:  
+                print("======================================")
+                print("     THANK YOU. PLEASE COME AGAIN.")
+                print("======================================\n")
+                sys.exit()
+            elif cat_choice == 4:  
+                restock_inventory()
+                continue
+
+            category = ['Hot Coffee', 'Iced Coffee', 'Bakery'][cat_choice - 1]
+
+            items = display_sub_menu(category)
+            item_choice = get_item_choice(items)
+            if item_choice == len(items) + 1:
+                continue  
+
+            item = items[item_choice - 1]
+
+            if category == 'Bakery':
+                sub_items = list(INVENTORY[category][item].keys())
+                print(f"\nAvailable {item}:")
+                for idx, sub_item in enumerate(sub_items, 1):
+                    print(f"{idx}. {sub_item}")
+                print(f"{len(sub_items)+1}. Back to Bakery Menu")
+
+                while True:
+                    try:
+                        sub_choice = int(input(f"Select {item} type (1-{len(sub_items)+1}): "))
+                        if sub_choice == len(sub_items)+1:
+                            break  
+                        if 1 <= sub_choice <= len(sub_items):
+                            item = sub_items[sub_choice - 1]
+                            size = None
+                            max_qty = INVENTORY[category][items[item_choice - 1]][item]
+                            break
+                        else:
+                            print("Invalid choice.")
+                    except ValueError:
+                        print("Invalid input.")
+                if sub_choice == len(sub_items)+1:
+                    continue  
+            else:
+                size = get_cup_size()
+                max_qty = INVENTORY[category][item][size]
+
+            if max_qty == 0 or not check_stock(category, item, size, 1):
+                handle_out_of_stock()
+                continue
+
+            qty = get_quantity(max_qty)
+            if not check_stock(category, item, size, qty):
+                handle_out_of_stock()
+                continue
+
+            add_ons = []
+            if category != 'Bakery':
+                add_ons = get_add_ons()
+
+            subtotal, vat, total = calculate_price(category, item, size, qty, add_ons)
+            desc = f"{item}"
+            if size:
+                size_initial = size[0].upper()
+                desc += f" ({size_initial})"
+            if add_ons:
+                desc += f" with {', '.join(add_ons)}"
+
+            order_list.append({
+                'category': category,
+                'item': item,
+                'size': size,
+                'qty': qty,
+                'add_ons': add_ons,
+                'subtotal': subtotal,
+                'vat': vat,
+                'total': total,
+                'desc': desc
+            })
+
+
+            if not ask_add_another():
+                break
+
+        if not order_list:
+            continue
+
+        discount_applied = ask_discount()
+        total_due = show_order_summary(order_list, discount_applied)
+
+        if confirm_order():
+            update_inventory(order_list)
+            print_receipt(order_list, discount_applied, total_due, dine_option)
+            show_inventory()
+            sys.exit()
+        else:
+            print("Order cancelled.")
+            print("\n")
+            print("======================================")
+            print("     THANK YOU. PLEASE COME AGAIN.")
+            print("======================================\n")
+            sys.exit()
+
+if __name__ == "__main__":
+    main()
